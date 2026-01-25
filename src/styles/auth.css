@@ -55,6 +55,7 @@ body {
   width: 100%;
   height: 42px;
   padding: 0 14px;
+  margin-bottom: 10px;
 
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -77,12 +78,14 @@ body {
    PRIMARY BUTTON
 ========================= */
 .primary {
-  height: 44px;
+  width: 70%;
+  height: 34px;
+  margin: 12px auto 12px;
   border: none;
   border-radius: 10px;
   cursor: pointer;
 
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 500;
   color: white;
 
@@ -102,21 +105,71 @@ body {
 }
 
 /* =========================
+   ROLE SELECTOR
+========================= */
+.role-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.role-btn {
+  flex: 1;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.role-btn.active {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  border-color: #00c6ff;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 198, 255, 0.3);
+}
+
+/* Admin Code Input Special Styling */
+.admin-code-input {
+  border-color: rgba(255, 196, 0, 0.5) !important;
+  background: rgba(255, 196, 0, 0.1) !important;
+}
+
+.admin-code-input::placeholder {
+  color: rgba(255, 220, 100, 0.8);
+}
+
+.admin-code-input:focus {
+  border-color: #ffc400 !important;
+  box-shadow: 0 0 10px rgba(255, 196, 0, 0.3);
+}
+
+/* =========================
    SWITCH TEXT
 ========================= */
-.switch {
-  margin-top: 10px;
+.switch-text {
+  margin: 8px 0 0;
   font-size: 13px;
   text-align: center;
   color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
 }
 
-.switch span {
+.switch-text .link {
   color: #00c6ff;
+  cursor: pointer;
+  font-weight: 500;
 }
 
-.switch span:hover {
+.switch-text .link:hover {
   text-decoration: underline;
 }
 
