@@ -18,3 +18,5 @@ All members contribute as Blue Team analysts with divided responsibilities.
 - Log analysis
 - Rule-based detection
 - Forensics & reporting
+
+This is my first local edit.
