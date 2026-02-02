@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ArrowLeft, ShieldAlert, Activity, MapPin, Monitor } from 'lucide-react';
+import { ArrowLeft, ShieldAlert, Activity, MapPin, Monitor, Star } from 'lucide-react';
 
-export default function UserProfile() {
+export default function UserProfile({ toggleFavorite, favoritedUsers }) {
   const { username } = useParams();
   const [logs, setLogs] = useState([]);
   const navigate = useNavigate();
@@ -14,6 +14,8 @@ export default function UserProfile() {
     });
   }, [username]);
 
+  // Check if this specific user is in the watchlist
+  const isUserStarred = favoritedUsers.includes(username);
   const latest = logs[0] || {};
 
   return (
@@ -31,7 +33,23 @@ export default function UserProfile() {
             <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-4 border-white rounded-full shadow-sm" />
           </div>
           <div className="space-y-1">
-            <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tight">{username}</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-3xl font-black text-slate-800 uppercase tracking-tight">{username}</h1>
+              
+              {/* THE WATCHLIST TOGGLE BUTTON */}
+              <button 
+                onClick={() => toggleFavorite(username)}
+                className={`p-2 rounded-full border transition-all duration-300 ${
+                  isUserStarred 
+                  ? 'bg-yellow-50 border-yellow-200 text-yellow-500 scale-110 shadow-sm' 
+                  : 'bg-gray-50 border-gray-100 text-gray-300 hover:text-gray-400'
+                }`}
+                title={isUserStarred ? "Remove from Watchlist" : "Add to Watchlist"}
+              >
+                <Star size={20} fill={isUserStarred ? "currentColor" : "none"} />
+              </button>
+            </div>
+
             <div className="flex gap-6 mt-4">
               <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase">
                 <Monitor size={14} /> {latest.hostname || 'Unknown Host'}
