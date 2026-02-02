@@ -90,19 +90,33 @@ const Nav = ({ logs }) => {
 };
 
 export default function App() {
-  const [logs, setLogs] = useState([]);
+  const [allLogs, setAllLogs] = useState([]);
+  const [displayLogs, setDisplayLogs] = useState([]);
   const [agents, setAgents] = useState({});
   const [loading, setLoading] = useState(true);
+  const [timeframe, setTimeframe] = useState('all');
+
+  // Logic to filter data based on timeframe
+  useEffect(() => {
+    if (timeframe === 'all') {
+      setDisplayLogs(allLogs);
+    } else if (timeframe === 'last_day') {
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      const filtered = allLogs.filter(log => new Date(log.timestamp) >= oneDayAgo);
+      setDisplayLogs(filtered);
+    }
+  }, [timeframe, allLogs]);
+
+  const fetchData = async () => {
+    try {
+      const [logsRes, agentsRes] = await Promise.all([threatService.getLogs(), threatService.getAgentStatus()]);
+      setAllLogs(logsRes.data || []);
+      setAgents(agentsRes.data || {});
+    } catch (err) { console.error("SIEM Connection Error", err); }
+    finally { setLoading(false); }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [logsRes, agentsRes] = await Promise.all([threatService.getLogs(), threatService.getAgentStatus()]);
-        setLogs(logsRes.data || []);
-        setAgents(agentsRes.data || {});
-      } catch (err) { console.error("SIEM Connection Error", err); }
-      finally { setLoading(false); }
-    };
     fetchData();
     const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
@@ -113,11 +127,11 @@ export default function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-[#f4f7f6]">
-        <Nav logs={logs} />
+        <Nav logs={allLogs} />
         <Routes>
-          <Route path="/" element={<Home logs={logs} agents={agents} />} />
-          <Route path="/incidents" element={<Incidents logs={logs} />} />
-          <Route path="/metrics" element={<Metrics logs={logs} agents={agents} />} />
+          <Route path="/" element={<Home logs={displayLogs} agents={agents} setTimeframe={setTimeframe} />} />
+          <Route path="/incidents" element={<Incidents logs={displayLogs} />} />
+          <Route path="/metrics" element={<Metrics logs={displayLogs} agents={agents} />} />
           <Route path="/playbooks" element={<Playbooks />} />
           <Route path="/profile/:username" element={<UserProfile />} />
         </Routes>

@@ -5,14 +5,20 @@ import {
   Users, UserMinus, HardDriveDownload, Globe, Zap 
 } from 'lucide-react';
 
-const BentoCard = ({ title, children, icon: Icon, extra }) => (
+const BentoCard = ({ title, children, icon: Icon, extra, onExtraClick }) => (
   <div className="bg-white border border-gray-200 rounded shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full overflow-hidden group">
     <div className="px-3 py-2 border-b bg-gray-50/50 flex justify-between items-center group-hover:bg-gray-100/50 transition-colors">
       <div className="flex items-center gap-2">
         {Icon && <Icon size={14} className="text-gray-400 group-hover:text-[#86b059] transition-colors" />}
         <h2 className="text-[11px] font-black uppercase text-slate-600 tracking-widest">{title}</h2>
       </div>
-      <span className="text-[10px] text-blue-500 font-bold cursor-pointer hover:underline uppercase">{extra}</span>
+      {/* THIS IS THE TRIGGERED BUTTON */}
+      <span 
+        onClick={onExtraClick}
+        className="text-[10px] text-blue-500 font-bold cursor-pointer hover:underline uppercase select-none"
+      >
+        {extra}
+      </span>
     </div>
     <div className="p-3 flex-grow">{children}</div>
   </div>
@@ -33,15 +39,14 @@ const UserRow = ({ name, score, role, onClick }) => (
   </div>
 );
 
-export default function Home({ logs, agents }) {
+export default function Home({ logs, agents, setTimeframe }) {
   const navigate = useNavigate();
 
-  // Logic tied to main.py state
   const notableUsers = Array.from(new Set(logs.map(l => l.username)))
     .map(u => logs.slice().reverse().find(l => l.username === u))
     .sort((a, b) => b.risk_score - a.risk_score);
 
-  const blockedUsers = logs.filter(l => l.risk_score >= 180); // Matches BLOCK_THRESHOLD
+  const blockedUsers = logs.filter(l => l.risk_score >= 180);
 
   return (
     <main className="max-w-[1600px] mx-auto p-4 space-y-4">
@@ -49,14 +54,22 @@ export default function Home({ logs, agents }) {
       {/* ROW 1: INCIDENTS */}
       <div className="grid grid-cols-12 gap-4 h-[280px]">
         <div className="col-span-12 lg:col-span-6">
-          <BentoCard title="My Incidents" extra="Create Date">
+          <BentoCard 
+            title="My Incidents" 
+            extra="Create Date" 
+            onExtraClick={() => { console.log("Filtering: All"); setTimeframe('all'); }}
+          >
             <div className="h-full flex items-center justify-center text-gray-400 text-xs italic">
               There are no incidents assigned to you.
             </div>
           </BentoCard>
         </div>
         <div className="col-span-12 lg:col-span-6">
-          <BentoCard title={`Incidents in My Queues (${blockedUsers.length})`} extra="Create Date">
+          <BentoCard 
+            title={`Incidents in My Queues (${blockedUsers.length})`} 
+            extra="Create Date"
+            onExtraClick={() => setTimeframe('all')}
+          >
             <div className="space-y-1 overflow-y-auto max-h-[220px] pr-2">
               {logs.slice(-5).reverse().map((log, i) => (
                 <div key={i} onClick={() => navigate(`/profile/${log.username}`)} className="flex justify-between items-center p-2 border-b border-gray-50 hover:bg-gray-50 cursor-pointer">
@@ -76,7 +89,12 @@ export default function Home({ logs, agents }) {
 
       {/* ROW 2: NOTABLES & ASSETS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <BentoCard title="Notable Users" icon={User} extra="Last day">
+        <BentoCard 
+            title="Notable Users" 
+            icon={User} 
+            extra="Last day"
+            onExtraClick={() => { console.log("Filtering: Last Day"); setTimeframe('last_day'); }}
+        >
           <div className="space-y-1">
             {notableUsers.slice(0, 5).map((u, i) => (
               <UserRow key={i} name={u.username} score={u.risk_score} onClick={() => navigate(`/profile/${u.username}`)} />
@@ -84,7 +102,7 @@ export default function Home({ logs, agents }) {
           </div>
         </BentoCard>
 
-        <BentoCard title="Notable Assets" icon={Monitor} extra="Last day">
+        <BentoCard title="Notable Assets" icon={Monitor} extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
           <div className="space-y-3">
             {Object.entries(agents).map(([host, status], i) => (
               <div key={i} className="flex justify-between items-center p-2 rounded bg-slate-50/50">
@@ -98,9 +116,8 @@ export default function Home({ logs, agents }) {
           </div>
         </BentoCard>
 
-        <BentoCard title="Account Lockouts" icon={Lock} extra="Last day">
+        <BentoCard title="Account Lockouts" icon={Lock} extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
           <div className="space-y-2">
-            {/* Logic filters users blocked by main.py logic */}
             {notableUsers.filter(u => u.risk_score >= 180).slice(0, 2).map((u, i) => (
               <div key={i} className="flex justify-between items-center p-1">
                 <div className="flex items-center gap-2">
@@ -114,7 +131,7 @@ export default function Home({ logs, agents }) {
           </div>
         </BentoCard>
 
-        <BentoCard title="Service Accounts" extra="Last day">
+        <BentoCard title="Service Accounts" extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
           <div className="space-y-3">
             {['svc_av_admin', 'svc_sp_admin', 'svc_prod_1'].map((svc, i) => (
               <div key={i} className="flex justify-between items-center text-[11px] font-bold text-slate-700">
@@ -126,9 +143,9 @@ export default function Home({ logs, agents }) {
         </BentoCard>
       </div>
 
-      {/* ROW 3: EXECUTIVE & LEAVERS (FROM IMAGE_D7D0B8.JPG) */}
+      {/* ROW 3: EXECUTIVE & LEAVERS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <BentoCard title="Executive Users" icon={Users} extra="Last day">
+        <BentoCard title="Executive Users" icon={Users} extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
           <div className="space-y-2">
              {['Andrew Bautista', 'Cecilia Gibson'].map((name, i) => (
                <div key={i} className="flex justify-between items-center opacity-60">
@@ -139,26 +156,23 @@ export default function Home({ logs, agents }) {
           </div>
         </BentoCard>
 
-        <BentoCard title="Suspected Leavers" icon={UserMinus} extra="Last day">
+        <BentoCard title="Suspected Leavers" icon={UserMinus} extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
           <div className="space-y-2">
-             {/* Maps to users with High risk in main.py */}
              {notableUsers.filter(u => u.risk_score > 100).slice(0, 2).map((u, i) => (
                <UserRow key={i} name={u.username} score={u.risk_score} onClick={() => navigate(`/profile/${u.username}`)} />
              ))}
           </div>
         </BentoCard>
 
-        <BentoCard title="Data Exfiltration" icon={HardDriveDownload} extra="Last day">
+        <BentoCard title="Data Exfiltration" icon={HardDriveDownload} extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
           <div className="space-y-2">
-             {/* Filters logs for 'bulk' actions defined in main.py */}
              {logs.filter(l => l.action.includes('Bulk') || l.risk_score > 150).slice(0, 2).map((l, i) => (
                <UserRow key={i} name={l.username} score={l.risk_score} onClick={() => navigate(`/profile/${l.username}`)} />
              ))}
           </div>
         </BentoCard>
 
-        <BentoCard title="First VPN from Geo" icon={Globe} extra="Last day">
-           {/* Displays users hitting the Geo-Intel risk rule in main.py */}
+        <BentoCard title="First VPN from Geo" icon={Globe} extra="Last day" onExtraClick={() => setTimeframe('last_day')}>
            {logs.filter(l => l.risk_score >= 50).slice(0, 1).map((l, i) => (
               <UserRow key={i} name={l.username} score={l.risk_score} onClick={() => navigate(`/profile/${l.username}`)} />
            ))}
