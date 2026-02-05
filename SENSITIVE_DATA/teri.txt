@@ -1,3 +1,0 @@
-admin_user: password
-db_root: pass_99
-emplyee_user:1234
